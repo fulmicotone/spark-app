@@ -38,7 +38,7 @@ public abstract class Step implements Serializable{
         } catch (Exception e) {
             throw
                     new UnknownCommandException(String
-                            .format("%s command not allowed choose between [getRevenues,takeSnapshot,mineResources]",
+                            .format("%s command not allowed",
                                     arguments));
         }
     }
