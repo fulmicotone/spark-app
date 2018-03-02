@@ -14,81 +14,61 @@ import java.time.LocalDateTime;
 import java.util.function.Supplier;
 
 
-public    class DatasetSupplier implements Supplier<Dataset<Row>> {
+public class DatasetSupplier implements Supplier<Dataset<Row>> {
 
-    static Logger log= LoggerFactory.getLogger(DatasetSupplier.class);
 
     protected final SparkSession session;
-
-    protected final LocalDateTime scheduledDate;
-
-    protected final LocalDateTime executionDate;
-
+    protected final StepArg args;
     private Dataset<Row> dataset;
 
-  protected DatasetSupplier(SparkSession session,
-                            LocalDateTime scheduledDate,
-                            LocalDateTime executionDate,
-                            Dataset<Row> ds){
-
-      this.session=session;
-      this.dataset=ds;
-      this.scheduledDate=scheduledDate;
-      this.executionDate=executionDate;
-  }
-
-
-  public DatasetSupplier map(TimeDatasetProcessor processor) {
-      return transform(processor.apply(this.dataset,this.scheduledDate,this.executionDate));
-
-  }
-
-
-    public DatasetSupplier map(DatasetProcessor processor) {  return transform(processor.apply(this.dataset)); }
-
-
-
-    public <E> DatasetSupplier map(DatasetProcessorWithArgs<E> processor, E ... args) {
-        return transform(processor.apply(this.dataset,args));
-
+    protected DatasetSupplier(SparkSession session,
+                              StepArg args,
+                              Dataset<Row> ds) {
+        this.session = session;
+        this.dataset = ds;
+        this.args = args;
     }
 
 
+    public DatasetSupplier map(TimeDatasetProcessor processor) {
+        return transform(processor.apply(this.dataset, this.args.scheduledDateTime, this.args.scheduledDateTime));
+
+    }
+
+    public DatasetSupplier map(DatasetProcessor processor) {
+        return transform(processor.apply(this.dataset));
+    }
 
 
-  private DatasetSupplier transform(Dataset<Row> dataset){
-      return create(
-              this.scheduledDate,
-              this.executionDate,
-              this.session,
-              dataset);
-  }
-
-    public  static DatasetSupplier read(String path,
-                                        String format,
-                                        LocalDateTime scheduledDate,
-                                        LocalDateTime executionDate,
-                                        SparkSession session, StructType ... schema){
+    public <E> DatasetSupplier map(DatasetProcessorWithArgs<E> processor, E... args) {
+        return transform(processor.apply(this.dataset, args));
+    }
 
 
+    private DatasetSupplier transform(Dataset<Row> dataset) {
+        return create(this.session, this.args, dataset);
+    }
 
-      return new DatasetSupplier(session,scheduledDate,executionDate, schema.length>1?
-              session.read().schema(schema[0]).option("header", "true").format(format).load(path):
-              session.read().option("header", "true").format(format).load(path));
+    public static DatasetSupplier read(String path,
+                                       String format,
+                                       Step step,
+                                       SparkSession session, StructType... schema) {
 
 
-  }
+        return new DatasetSupplier(session, step.arg, schema.length > 1 ?
+                session.read().schema(schema[0]).option("header", "true").format(format).load(path) :
+                session.read().option("header", "true").format(format).load(path));
+    }
 
 
-    public  static DatasetSupplier create(LocalDateTime scheduledDate,
-                                          LocalDateTime executionDate,
-                                          SparkSession session,
-                                          Dataset<Row> dataset){
-        return new DatasetSupplier(session,scheduledDate,executionDate,dataset);
+    public static DatasetSupplier create(SparkSession session, StepArg args, Dataset<Row> dataset) {
+        return new DatasetSupplier(session, args, dataset);
     }
 
     @Override
-    public Dataset<Row> get() { return dataset; }
+    public Dataset<Row> get() {
+        return dataset;
+    }
 
 
 }

@@ -26,7 +26,7 @@ import java.util.Properties;
 public abstract class Step implements Serializable{
 
     protected Logger log= LoggerFactory.getLogger(this.getClass());
-    private StepArg arg;
+    protected StepArg arg;
     private Properties appProp=new AppPropertiesProvider().get();
     private PathDecoder pathDecoder;
 
@@ -60,16 +60,10 @@ public abstract class Step implements Serializable{
                                       StructType... structType){
 
         return  DatasetSupplier.read(
-                awsStreamFolder?pathDecoder.getInputAWSPath(
-                        arg.scheduledDateTime,
-                        key,
-                        wildDeepLevel):pathDecoder.getInputPath(
-                        arg.scheduledDateTime,
-                        key,
-                        wildDeepLevel),
+                awsStreamFolder?pathDecoder.getInputAWSPath(arg.scheduledDateTime, key, wildDeepLevel):
+                        pathDecoder.getInputPath(arg.scheduledDateTime, key, wildDeepLevel),
                 format,
-                arg.scheduledDateTime,
-                arg.executionDateTime,
+               this,
                 SparkSession.getActiveSession().get(),structType);
     }
 
