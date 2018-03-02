@@ -39,7 +39,7 @@ public abstract class Step implements Serializable{
             throw
                     new UnknownCommandException(String
                             .format("%s command not allowed",
-                                    arguments));
+                                    arguments.command));
         }
     }
 
