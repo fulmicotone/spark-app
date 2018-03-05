@@ -14,7 +14,7 @@ public  class AddEtlCreationColumnProcessor extends TimeDatasetProcessor {
 
 
     @Override
-    public Dataset<Row> apply(Dataset dsupp, LocalDateTime scheduledTime, LocalDateTime executionDate) {
+    public Dataset apply(Dataset dsupp, LocalDateTime scheduledTime, LocalDateTime executionDate) {
 
         return dsupp.withColumn("etl_update_time",
                 lit(scheduledTime.toInstant(ZoneOffset.UTC).toEpochMilli())

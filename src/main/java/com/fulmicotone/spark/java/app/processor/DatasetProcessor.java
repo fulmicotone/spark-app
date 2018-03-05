@@ -6,4 +6,4 @@ import org.apache.spark.sql.Row;
 import java.util.function.Function;
 
 
-public abstract class DatasetProcessor implements Function<Dataset<Row>, Dataset<Row>> { }
+public abstract class DatasetProcessor  implements Function<Dataset, Dataset> { }

@@ -8,7 +8,7 @@ public  class CacheDatasetProcessor extends DatasetProcessor {
 
 
     @Override
-    public Dataset<Row> apply(Dataset<Row> rowDataset) {
+    public Dataset apply(Dataset rowDataset) {
 
         rowDataset.cache();
         rowDataset.count();

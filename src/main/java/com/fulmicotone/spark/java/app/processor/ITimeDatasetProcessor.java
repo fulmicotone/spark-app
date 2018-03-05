@@ -9,5 +9,5 @@ import java.time.LocalDateTime;
 public interface ITimeDatasetProcessor {
 
 
-     Dataset<Row> apply(Dataset dsupp, LocalDateTime scheduledTime, LocalDateTime executionTime);
+     Dataset apply(Dataset dsupp, LocalDateTime scheduledTime, LocalDateTime executionTime);
 }

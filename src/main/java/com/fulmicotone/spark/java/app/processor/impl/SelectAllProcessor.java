@@ -10,7 +10,7 @@ public  class SelectAllProcessor extends DatasetProcessorWithArgs<String> {
 
 
     @Override
-    public Dataset<Row> apply(Dataset<Row> rowDataset, String[] exludeCols) {
+    public Dataset apply(Dataset rowDataset, String[] exludeCols) {
         return new DatasetSelectAll().apply(rowDataset,exludeCols);
     }
 }

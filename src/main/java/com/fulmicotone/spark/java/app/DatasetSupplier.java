@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 import java.util.function.Supplier;
 
 
-public class DatasetSupplier implements Supplier<Dataset<Row>> {
+public class DatasetSupplier implements Supplier<Dataset> {
 
 
     protected final SparkSession session;

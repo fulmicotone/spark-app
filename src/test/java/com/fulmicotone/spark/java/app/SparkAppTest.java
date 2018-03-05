@@ -1,6 +1,5 @@
 package com.fulmicotone.spark.java.app;
 
-import com.fulmicotone.spark.java.app.function.spark.DatasetSelectAll;
 import com.fulmicotone.spark.java.app.function.spark.SparkSessionFactoryFn;
 import com.fulmicotone.spark.java.app.processor.impl.SelectAllProcessor;
 import org.apache.spark.sql.SparkSession;
@@ -9,13 +8,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.validation.constraints.AssertTrue;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class SparkAppTest {
@@ -99,19 +95,10 @@ public class SparkAppTest {
 
     public void datasetTest(){}
 
-
     public void getSparkParallelismTest(){}
-
-
 
     public void newStepInstance(){}
 
-
-
-
     public void SparkSessionFactory(){}
-
-
-
 
 }
