@@ -63,7 +63,7 @@ public abstract class Step implements Serializable{
                 awsStreamFolder?pathDecoder.getInputAWSPath(arg.scheduledDateTime, key, wildDeepLevel):
                         pathDecoder.getInputPath(arg.scheduledDateTime, key, wildDeepLevel),
                 format,
-               this,
+               this.arg,
                 SparkSession.getActiveSession().get(),structType);
     }
 

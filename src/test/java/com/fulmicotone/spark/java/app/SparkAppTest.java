@@ -2,12 +2,16 @@ package com.fulmicotone.spark.java.app;
 
 import com.fulmicotone.spark.java.app.function.spark.SparkSessionFactoryFn;
 import com.fulmicotone.spark.java.app.processor.impl.SelectAllProcessor;
-import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.*;
+import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema;
+import org.apache.spark.sql.types.StructType;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.sql.DataSource;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
@@ -84,16 +88,32 @@ public class SparkAppTest {
 
     }
 
-    @Test
+   // @Test
     public void datasetSelectAllTest(){
 
 
-        datasetSupplier.map(new SelectAllProcessor(),new String[]{"Weight"}).get().collectAsList().stream()
-                .forEach(r-> Assert.assertTrue(r.size()==5));
+      /*  datasetSupplier.map(new SelectAllProcessor(),new String[]{"Weight"}).get().collectAsList().stream()
+                .forEach(r-> Assert.assertTrue(r.size()==5));*/
 
     }
 
-    public void datasetTest(){}
+    @Test
+    public void datasetTest(){
+
+
+        Dataset<Player> ds = DatasetSupplier.read(resourcePath + "/input/players/source.csv",
+                "csv", args, sparkSession,Structures.PLAYER).getAs(Player.class);
+        
+        Player player = ds.collectAsList().get(0);
+        Assert.assertTrue(ds.count()==19);
+        Assert.assertTrue(player.getName().equals("AdamDonachie"));
+        Assert.assertTrue(player.getHeight().equals(74));
+        Assert.assertTrue(player.getPosition().equals("Catcher"));
+        Assert.assertTrue(player.getTeam().equals("BAL"));
+        Assert.assertTrue(player.getAge()+"",player.getAge()==(22.99f ));
+        Assert.assertTrue(player.getWeight().equals(180));
+
+    }
 
     public void getSparkParallelismTest(){}
 

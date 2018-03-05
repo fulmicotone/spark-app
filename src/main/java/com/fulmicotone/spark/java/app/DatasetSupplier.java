@@ -4,6 +4,7 @@ import com.fulmicotone.spark.java.app.processor.DatasetProcessor;
 import com.fulmicotone.spark.java.app.processor.DatasetProcessorWithArgs;
 import com.fulmicotone.spark.java.app.processor.TimeDatasetProcessor;
 import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.StructType;
@@ -23,7 +24,7 @@ public class DatasetSupplier implements Supplier<Dataset> {
 
     protected DatasetSupplier(SparkSession session,
                               StepArg args,
-                              Dataset<Row> ds) {
+                              Dataset ds) {
         this.session = session;
         this.dataset = ds;
         this.args = args;
@@ -51,13 +52,13 @@ public class DatasetSupplier implements Supplier<Dataset> {
 
     public static DatasetSupplier read(String path,
                                        String format,
-                                       Step step,
+                                       StepArg arg,
                                        SparkSession session, StructType... schema) {
 
 
-        return new DatasetSupplier(session, step.arg, schema.length > 1 ?
-                session.read().schema(schema[0]).option("header", "true").format(format).load(path) :
-                session.read().option("header", "true").format(format).load(path));
+        return new DatasetSupplier(session, arg, schema.length > 0 ?
+                session.read().schema(schema[0]).option("header", true).format(format).load(path) :
+                session.read().option("header", true).format(format).load(path));
     }
 
 
@@ -68,6 +69,12 @@ public class DatasetSupplier implements Supplier<Dataset> {
     @Override
     public Dataset<Row> get() {
         return dataset;
+    }
+
+
+
+    public <E> Dataset<E> getAs(Class<E> clazz) {
+        return dataset.as(Encoders.bean(clazz));
     }
 
 
