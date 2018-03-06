@@ -2,14 +2,23 @@ package com.fulmicotone.spark.java.app;
 
 
 import com.fulmicotone.spark.java.app.exceptions.UnknownCommandException;
+import com.fulmicotone.spark.java.app.function.Functions;
 import com.fulmicotone.spark.java.app.function.spark.NewStepInstance;
 import com.fulmicotone.spark.java.app.utils.AppPropertiesProvider;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IOUtils;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.StructType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.Serializable;
+import java.io.*;
+import java.net.URI;
 import java.util.Properties;
 
 
@@ -26,7 +35,7 @@ import java.util.Properties;
 public abstract class Step implements Serializable{
 
     protected Logger log= LoggerFactory.getLogger(this.getClass());
-    protected StepArg arg;
+    private StepArg arg;
     private Properties appProp=new AppPropertiesProvider().get();
     private PathDecoder pathDecoder;
 
@@ -67,6 +76,34 @@ public abstract class Step implements Serializable{
                 SparkSession.getActiveSession().get(),structType);
     }
 
+
+
+
+    protected DatasetSupplier createDatasetSupplier(Dataset<Row> dataset){
+
+
+        return DatasetSupplier.create(SparkSession.getActiveSession().get(),arg,dataset);
+    }
+
+
+    public void saveOnHadoop(Configuration hadoopConf, InputStream is, String fileName) throws IOException {
+
+
+            Functions.writeFileOnHadoop(hadoopConf,is,fileName);
+
+
+    }
+
+
+    public FSDataInputStream readFromHadoop(Configuration hadoopConf, String filePath) throws IOException {
+
+        FileSystem fs = FileSystem.get(URI.create(filePath), hadoopConf);
+        FSDataInputStream in = null;
+        in = fs.open(new Path(filePath));
+        IOUtils.copyBytes(in, System.out, 4096, false);
+        return in;
+
+    }
 
     public void run(SparkSession session){ this.run(this.arg,session);}
 

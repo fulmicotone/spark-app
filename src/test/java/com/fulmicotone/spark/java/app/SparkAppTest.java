@@ -121,4 +121,20 @@ public class SparkAppTest {
 
     public void SparkSessionFactory(){}
 
+/**public static Function<ByteArrayOutputStream,InputStream> FROM_BAOS_TO_IS=(baos)->new ByteArrayInputStream(baos.toByteArray());**/
+
+   /* Configuration hadoopConfig=new Configuration();
+
+                log.info("connecting with: {}",hadoopConfig.get("fs.defaultFS"));*/
+
+   /* public static void  writeFileToHadoop(Configuration config, InputStream is, String filename) throws IOException {
+
+        FileSystem fs = FileSystem.get(URI.create(filename), config);
+
+        IOUtils.copyBytes(is,  fs.create(new Path(filename)), 4096, true);
+
+
+
+    }*/
+
 }
