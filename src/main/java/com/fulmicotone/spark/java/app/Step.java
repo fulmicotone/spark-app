@@ -62,7 +62,7 @@ public abstract class Step implements Serializable{
      * it means that if we received the parameter -i s3://resources and as scheduled date 10/01/1987
      * passing parameter dir hit we'll get back s3://resources/hit/year=1987/month=01/day=10
      */
-    public DatasetSupplier readOnDate(String key,
+    protected DatasetSupplier readOnDate(String key,
                                       String format,
                                       int wildDeepLevel,
                                       boolean awsStreamFolder,
@@ -86,7 +86,7 @@ public abstract class Step implements Serializable{
     }
 
 
-    public void saveOnHadoop(Configuration hadoopConf, InputStream is, String fileName) throws IOException {
+    protected void saveOnHadoop(Configuration hadoopConf, InputStream is, String fileName) throws IOException {
 
 
             Functions.writeFileOnHadoop(hadoopConf,is,fileName);
@@ -95,7 +95,7 @@ public abstract class Step implements Serializable{
     }
 
 
-    public FSDataInputStream readFromHadoop(Configuration hadoopConf, String filePath) throws IOException {
+    protected FSDataInputStream readFromHadoop(Configuration hadoopConf, String filePath) throws IOException {
 
         FileSystem fs = FileSystem.get(URI.create(filePath), hadoopConf);
         FSDataInputStream in = null;
