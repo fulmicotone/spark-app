@@ -34,7 +34,7 @@ import java.util.Properties;
  */
 public abstract class Step implements Serializable{
 
-    protected Logger log= LoggerFactory.getLogger(this.getClass());
+    protected static Logger log= LoggerFactory.getLogger(Step.class);
     private StepArg arg;
     private Properties appProp=new AppPropertiesProvider().get();
     private PathDecoder pathDecoder;
