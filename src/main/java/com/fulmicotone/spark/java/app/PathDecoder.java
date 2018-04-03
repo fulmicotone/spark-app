@@ -1,9 +1,13 @@
 package com.fulmicotone.spark.java.app;
 
+import com.fulmicotone.spark.java.app.function.path.WildOnPath;
 import com.fulmicotone.spark.java.app.function.time.LocalDateToPartitionedStringPath;
 import com.fulmicotone.spark.java.app.function.time.LocalDateToPartitionedStringS3Path;
+import com.fulmicotone.spark.java.app.function.time.LocalDateToPeriodPartitionedStringPath;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class PathDecoder {
 
@@ -57,6 +61,22 @@ public class PathDecoder {
                 wildDeepLevel);
     }
 
+
+    public List<String> getInputPathsByPeriod(LocalDateTime ldt, String key, int days,int wildDeepLevel){
+
+
+        WildOnPath fn = new WildOnPath();
+        final String baseBacketPath = getAsString(Direction.input, key) + "/";
+
+       return  new LocalDateToPeriodPartitionedStringPath().apply(ldt,days).stream()
+
+                .map(periodPath->baseBacketPath+periodPath).map(path->fn.apply(path,wildDeepLevel))
+               .collect(Collectors.toList());
+
+
+
+    }
+
     private String getOnDate(LocalDateTime ldt,
                              String key,
                              Direction direction,
@@ -66,8 +86,8 @@ public class PathDecoder {
         String path= getAsString(direction, key) + "/" + (asAwsStream ?
                 new LocalDateToPartitionedStringS3Path().apply(ldt) :
                 new LocalDateToPartitionedStringPath().apply(ldt));
-        for(int i=0;i<wildDeepLevel;i++){path+="/*";}
-        return path ;
+
+       return new WildOnPath().apply(path,wildDeepLevel);
     }
 
 }

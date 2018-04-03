@@ -1,16 +1,23 @@
 package com.fulmicotone.spark.java.app.function;
 
+import com.fulmicotone.spark.java.app.DatasetSupplier;
+import com.fulmicotone.spark.java.app.StepArg;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.types.StructType;
 
 import java.io.*;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -50,4 +57,31 @@ public class Functions {
                     return tmp;
                 } catch (FileNotFoundException e) { return null; } catch (IOException e) { return null; }
             };
+
+
+
+
+    public static DatasetSupplier readByPathList(List<String> pathList,
+                                              StepArg arg,
+                                              SparkSession sp,
+                                              String format,
+                                              StructType ... structType){
+
+
+
+
+        Dataset targetDS = null;
+
+        for(String sourcePath:pathList){
+
+            System.out.println("reading sourcesPath:"+sourcePath);
+
+            targetDS=targetDS==null?DatasetSupplier.read(sourcePath,format,arg,
+                    sp,structType).get():targetDS.union(DatasetSupplier.read(sourcePath,format,arg,
+                    sp,structType).get());
+
+        }
+
+        return DatasetSupplier.create(sp,arg,targetDS);
+    }
 }

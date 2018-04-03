@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.URI;
+import java.util.List;
 import java.util.Properties;
 
 
@@ -54,28 +55,36 @@ public abstract class Step implements Serializable{
 
     protected Properties appProperties(){ return this.appProp;}
 
-    /**
-     *
-     * @param key
-     * @param format csv,json,parquet
-     * @return read files from input bucket on the key indicated
-     * it means that if we received the parameter -i s3://resources and as scheduled date 10/01/1987
-     * passing parameter dir hit we'll get back s3://resources/hit/year=1987/month=01/day=10
-     */
-    protected DatasetSupplier readOnDate(String key,
+
+    //todo test
+    protected DatasetSupplier readByPeriod(String key,
                                       String format,
-                                      int wildDeepLevel,
-                                      boolean awsStreamFolder,
+                                      int days,
+                                           int wildDeepLevel,
                                       StructType... structType){
+
+
+        return    Functions.readByPathList( pathDecoder
+                .getInputPathsByPeriod(arg.scheduledDateTime, key, days, wildDeepLevel),
+                arg,SparkSession.getActiveSession().get(),format,structType);
+
+    }
+
+
+
+    protected DatasetSupplier readOnDate(String key,
+                                         String format,
+                                         int wildDeepLevel,
+                                         boolean awsStreamFolder,
+                                         StructType... structType){
 
         return  DatasetSupplier.read(
                 awsStreamFolder?pathDecoder.getInputAWSPath(arg.scheduledDateTime, key, wildDeepLevel):
                         pathDecoder.getInputPath(arg.scheduledDateTime, key, wildDeepLevel),
                 format,
-               this.arg,
+                this.arg,
                 SparkSession.getActiveSession().get(),structType);
     }
-
 
 
 

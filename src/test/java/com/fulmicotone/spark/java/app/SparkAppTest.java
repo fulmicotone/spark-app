@@ -1,8 +1,10 @@
 package com.fulmicotone.spark.java.app;
 
+import com.fulmicotone.spark.java.app.function.Functions;
 import com.fulmicotone.spark.java.app.function.spark.SparkSessionFactoryFn;
 import com.fulmicotone.spark.java.app.processor.impl.SelectAllProcessor;
 import org.apache.spark.sql.*;
+import org.apache.spark.sql.catalyst.expressions.AssertTrue;
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema;
 import org.apache.spark.sql.types.StructType;
 import org.junit.Assert;
@@ -88,14 +90,6 @@ public class SparkAppTest {
 
     }
 
-   // @Test
-    public void datasetSelectAllTest(){
-
-
-      /*  datasetSupplier.map(new SelectAllProcessor(),new String[]{"Weight"}).get().collectAsList().stream()
-                .forEach(r-> Assert.assertTrue(r.size()==5));*/
-
-    }
 
     @Test
     public void datasetTest(){
@@ -115,26 +109,60 @@ public class SparkAppTest {
 
     }
 
-    public void getSparkParallelismTest(){}
-
-    public void newStepInstance(){}
-
-    public void SparkSessionFactory(){}
-
-/**public static Function<ByteArrayOutputStream,InputStream> FROM_BAOS_TO_IS=(baos)->new ByteArrayInputStream(baos.toByteArray());**/
-
-   /* Configuration hadoopConfig=new Configuration();
-
-                log.info("connecting with: {}",hadoopConfig.get("fs.defaultFS"));*/
-
-   /* public static void  writeFileToHadoop(Configuration config, InputStream is, String filename) throws IOException {
-
-        FileSystem fs = FileSystem.get(URI.create(filename), config);
-
-        IOUtils.copyBytes(is,  fs.create(new Path(filename)), 4096, true);
 
 
+    @Test
+    public void LocalDateToPeriodTest(){
 
-    }*/
+
+        List<String> results = Arrays.asList(
+                "/input/players/year=2018/month=02/day=20/*",
+                "/input/players/year=2018/month=02/day=21/*",
+                "/input/players/year=2018/month=02/day=22/*",
+                "/input/players/year=2018/month=02/day=23/*",
+                "/input/players/year=2018/month=02/day=24/*",
+                "/input/players/year=2018/month=02/day=25/*",
+                "/input/players/year=2018/month=02/day=26/*",
+                "/input/players/year=2018/month=02/day=27/*",
+                "/input/players/year=2018/month=02/day=28/*",
+                "/input/players/year=2018/month=03/day=01/*");
+
+        //start date 2018 03 01
+        PathDecoder pathDecoder=new PathDecoder(args);
+
+        AtomicInteger atomicInteger=new AtomicInteger(-1);
+
+        List<String> sourcesPath = pathDecoder.getInputPathsByPeriod(args.scheduledDateTime, "players", 10, 1);
+
+        sourcesPath.stream()
+                .map(r->r.replace(resourcePath,"")).
+                 forEach(expectedResult-> {
+            String result = results.get(atomicInteger.incrementAndGet());
+
+            Assert
+                    .assertTrue(result+ " is different of expected:"
+                            +expectedResult,result.equals(expectedResult));
+        });
+
+
+        DatasetSupplier ds = Functions.readByPathList(sourcesPath, args, sparkSession, "csv");
+
+        int size= (int) ds.get().count();
+        Row lastRecord = ds.get().collectAsList().get(size - 1);
+        Row firstRecord = ds.get().collectAsList().get(0);
+
+
+        ds.get().show(false);
+
+        Assert.assertTrue("expected AdamDonachie  was:"+
+                firstRecord.getString(0),firstRecord.getString(0).equals("AdamDonachie"));
+        Assert.assertTrue(lastRecord.getString(0).equals("HaydenPenn"));
+        Assert.assertTrue("size expected:"+19+" was:"+size,size==19);
+
+
+
+
+
+    }
 
 }
