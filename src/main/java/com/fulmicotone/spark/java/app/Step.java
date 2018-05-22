@@ -17,9 +17,11 @@ import org.apache.spark.sql.types.StructType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
 import java.net.URI;
-import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 
 
@@ -39,6 +41,7 @@ public abstract class Step implements Serializable{
     private StepArg arg;
     private Properties appProp=new AppPropertiesProvider().get();
     private PathDecoder pathDecoder;
+    private Optional<Dataset> testPurposeDataset=Optional.empty();
 
     protected Step(){}
 
@@ -87,18 +90,32 @@ public abstract class Step implements Serializable{
     }
 
 
+    protected  void setTestDataset(Dataset testPurposeDataset){
+
+        this.testPurposeDataset=Optional
+                .ofNullable(testPurposeDataset);
+    }
+
+
+
+    public Optional<Dataset> getTestPurposeDataset(){
+
+        return testPurposeDataset;
+    }
+
 
     protected DatasetSupplier createDatasetSupplier(Dataset<Row> dataset){
 
-
-        return DatasetSupplier.create(SparkSession.getActiveSession().get(),arg,dataset);
+        return DatasetSupplier
+                .create(SparkSession.getActiveSession().get(),
+                        arg,dataset);
     }
 
 
     protected void saveOnHadoop(Configuration hadoopConf, InputStream is, String fileName) throws IOException {
 
-
-            Functions.writeFileOnHadoop(hadoopConf,is,fileName);
+            Functions
+                    .writeFileOnHadoop(hadoopConf,is,fileName);
 
 
     }
