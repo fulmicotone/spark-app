@@ -2,18 +2,15 @@ package com.fulmicotone.spark.java.app;
 
 import com.fulmicotone.spark.java.app.function.Functions;
 import com.fulmicotone.spark.java.app.function.spark.SparkSessionFactoryFn;
-import com.fulmicotone.spark.java.app.processor.impl.SelectAllProcessor;
-import org.apache.spark.sql.*;
-import org.apache.spark.sql.catalyst.expressions.AssertTrue;
-import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema;
-import org.apache.spark.sql.types.StructType;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.sql.DataSource;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
@@ -35,7 +32,6 @@ public class SparkAppTest {
          resourcePath = new File(SparkAppTest
                 .class.getClassLoader().getResource("input")
                 .getPath()).getParent();
-
 
         log.info("resourcePath:"+resourcePath);
 
@@ -92,7 +88,7 @@ public class SparkAppTest {
 
 
     @Test
-    public void datasetTest(){
+    public void dataSupplierTest(){
 
 
         Dataset<Player> ds = DatasetSupplier.read(resourcePath + "/input/players/source.csv",
@@ -110,9 +106,8 @@ public class SparkAppTest {
     }
 
 
-
     @Test
-    public void LocalDateToPeriodTest(){
+    public void localDateToPeriodTest(){
 
 
         List<String> results = Arrays.asList(
@@ -151,18 +146,13 @@ public class SparkAppTest {
         Row lastRecord = ds.get().collectAsList().get(size - 1);
         Row firstRecord = ds.get().collectAsList().get(0);
 
-
-        ds.get().show(false);
-
         Assert.assertTrue("expected AdamDonachie  was:"+
                 firstRecord.getString(0),firstRecord.getString(0).equals("AdamDonachie"));
         Assert.assertTrue(lastRecord.getString(0).equals("HaydenPenn"));
         Assert.assertTrue("size expected:"+19+" was:"+size,size==19);
 
-
-
-
-
     }
+
+
 
 }

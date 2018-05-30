@@ -22,7 +22,7 @@ public class SparkMain implements ISparkApp<String>{
 
             SparkSession.setActiveSession(spark);
 
-            Step.newStepBy(appArgs).run(spark);
+            Step.newStepBy(appArgs).execute(spark);
 
         } catch (Exception e) {
 

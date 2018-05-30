@@ -1,6 +1,5 @@
 package com.fulmicotone.spark.java.app;
 
-
 import com.fulmicotone.spark.java.app.exceptions.UnknownCommandException;
 import com.fulmicotone.spark.java.app.function.Functions;
 import com.fulmicotone.spark.java.app.function.spark.NewStepInstance;
@@ -16,7 +15,6 @@ import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.StructType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -41,7 +39,7 @@ public abstract class Step implements Serializable{
     private StepArg arg;
     private Properties appProp=new AppPropertiesProvider().get();
     private PathDecoder pathDecoder;
-    private Optional<Dataset> testPurposeDataset=Optional.empty();
+    private Optional<Dataset> keptDataset =Optional.empty();
 
     protected Step(){}
 
@@ -58,29 +56,22 @@ public abstract class Step implements Serializable{
 
     protected Properties appProperties(){ return this.appProp;}
 
-
     //todo test
     protected DatasetSupplier readByPeriod(String key,
                                       String format,
                                       int days,
                                            int wildDeepLevel,
                                       StructType... structType){
-
-
         return    Functions.readByPathList( pathDecoder
                 .getInputPathsByPeriod(arg.scheduledDateTime, key, days, wildDeepLevel),
                 arg,SparkSession.getActiveSession().get(),format,structType);
-
     }
-
-
 
     protected DatasetSupplier readOnDate(String key,
                                          String format,
                                          int wildDeepLevel,
                                          boolean awsStreamFolder,
                                          StructType... structType){
-
         return  DatasetSupplier.read(
                 awsStreamFolder?pathDecoder.getInputAWSPath(arg.scheduledDateTime, key, wildDeepLevel):
                         pathDecoder.getInputPath(arg.scheduledDateTime, key, wildDeepLevel),
@@ -89,37 +80,24 @@ public abstract class Step implements Serializable{
                 SparkSession.getActiveSession().get(),structType);
     }
 
-
-    protected  void setTestDataset(Dataset testPurposeDataset){
-
-        this.testPurposeDataset=Optional
-                .ofNullable(testPurposeDataset);
+    protected  void wrapDataset(Dataset ds){
+        this.keptDataset =Optional.ofNullable(ds);
     }
 
-
-
-    public Optional<Dataset> getTestPurposeDataset(){
-
-        return testPurposeDataset;
+    public Optional<Dataset> unwrapDataset(){
+        return keptDataset;
     }
-
 
     protected DatasetSupplier createDatasetSupplier(Dataset<Row> dataset){
-
         return DatasetSupplier
                 .create(SparkSession.getActiveSession().get(),
                         arg,dataset);
     }
 
-
     protected void saveOnHadoop(Configuration hadoopConf, InputStream is, String fileName) throws IOException {
-
             Functions
                     .writeFileOnHadoop(hadoopConf,is,fileName);
-
-
     }
-
 
     protected FSDataInputStream readFromHadoop(Configuration hadoopConf, String filePath) throws IOException {
 
@@ -128,10 +106,19 @@ public abstract class Step implements Serializable{
         in = fs.open(new Path(filePath));
         IOUtils.copyBytes(in, System.out, 4096, false);
         return in;
-
     }
 
-    public void run(SparkSession session){ this.run(this.arg,session);}
+    protected void execute(SparkSession session){
+        this.beforeRun(this.arg,session);
+        this.run(this.arg,session);
+        this.afterRun(this.arg,session);
+    }
+
+
+    /**methods to implements**/
+    protected   void beforeRun(StepArg arg, SparkSession sparkSession){}
+
+    protected   void afterRun(StepArg arg, SparkSession sparkSession){}
 
     protected abstract  void run(StepArg arg, SparkSession sparkSession);
 
