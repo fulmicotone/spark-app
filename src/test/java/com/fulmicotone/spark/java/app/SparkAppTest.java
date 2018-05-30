@@ -155,4 +155,42 @@ public class SparkAppTest {
 
 
 
+    @Test
+    public void stepBoxTest(){
+
+
+
+        StepArg arg = StepArg.build(new String[]{
+                "-i", "x",
+                "-o", "fakeOutputPath",
+                "-cmd", "com.fulmicotone.spark.java.app.MyStep",
+                "-sdt", "2018-05-23T23:59:00",
+                "-edt", "2018-05-23T23:59:00",
+                "-env","local",
+                "o",
+                "f"
+        });
+
+
+        Dataset fullLifeCycleResult = StepBox.newTest(sparkSession, arg)
+                .fullRun().getStep().unwrapDataset()
+                .get();
+
+
+        Dataset onlyRunMethodResult = StepBox.newTest(sparkSession, arg)
+                .runOnly().getStep().unwrapDataset()
+                .get();
+
+        List<String> rExpected1 = Arrays.asList("RUN");
+        List<String> rExpected2 = Arrays.asList("AFTERRUN","RUN","BEFORERUN");
+
+
+        Assert.assertTrue( onlyRunMethodResult.collectAsList().stream().allMatch(rExpected1::contains));
+
+        Assert.assertTrue( fullLifeCycleResult.collectAsList().stream().allMatch(rExpected2::contains));
+
+    }
+
+
+
 }
