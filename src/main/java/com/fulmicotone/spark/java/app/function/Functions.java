@@ -74,12 +74,16 @@ public class Functions {
 
         for(String sourcePath:pathList){
 
-            System.out.println("reading sourcesPath:"+sourcePath);
+            try {
+                System.out.println("reading sourcesPath:" + sourcePath);
 
-            targetDS=targetDS==null?DatasetSupplier.read(sourcePath,format,arg,
-                    sp,structType).get():targetDS.union(DatasetSupplier.read(sourcePath,format,arg,
-                    sp,structType).get());
+                targetDS = targetDS == null ? DatasetSupplier.read(sourcePath, format, arg,
+                        sp, structType).get() : targetDS.union(DatasetSupplier.read(sourcePath, format, arg,
+                        sp, structType).get());
 
+            }catch (Exception ex){
+                System.out.println("problem reading sourcesPath:" + sourcePath+" SKIPPED");
+            }
         }
 
         return DatasetSupplier.create(sp,arg,targetDS);
