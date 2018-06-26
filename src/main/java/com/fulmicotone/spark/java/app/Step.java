@@ -39,7 +39,7 @@ public abstract class Step implements Serializable{
     private StepArg arg;
     private Properties appProp=new AppPropertiesProvider().get();
     private PathDecoder pathDecoder;
-    private Optional<Dataset> keptDataset =Optional.empty();
+    private Dataset keptDataset ;
 
     protected Step(){}
 
@@ -81,11 +81,11 @@ public abstract class Step implements Serializable{
     }
 
     protected  void wrapDataset(Dataset ds){
-        this.keptDataset =Optional.ofNullable(ds);
+        this.keptDataset =ds;
     }
 
     public Optional<Dataset> unwrapDataset(){
-        return keptDataset;
+        return Optional.ofNullable(keptDataset);
     }
 
     protected DatasetSupplier createDatasetSupplier(Dataset<Row> dataset){

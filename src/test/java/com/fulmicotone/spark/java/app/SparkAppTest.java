@@ -11,7 +11,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
+import java.io.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -35,13 +35,12 @@ public class SparkAppTest {
 
         log.info("resourcePath:"+resourcePath);
 
-        args = StepArg.build(new String[]
+        args = StepArgParser.build(new String[]
                 {"-i", resourcePath+"/input" ,
                         "-o", resourcePath + "/output",
                         "-cmd", "notNeedHere",
                         "-sdt", "2018-03-01T13:11:24",
                         "-edt", "2018-03-01T13:11:24",
-                        "-env", "local"});
 
         sparkSession= new SparkSessionFactoryFn().apply(args );
 
@@ -86,7 +85,6 @@ public class SparkAppTest {
 
     }
 
-
     @Test
     public void dataSupplierTest(){
 
@@ -102,7 +100,6 @@ public class SparkAppTest {
         Assert.assertTrue(player.getTeam().equals("BAL"));
         Assert.assertTrue(player.getAge()+"",player.getAge()==(22.99f ));
         Assert.assertTrue(player.getWeight().equals(180));
-
     }
 
 
@@ -158,9 +155,7 @@ public class SparkAppTest {
     @Test
     public void stepBoxTest(){
 
-
-
-        StepArg arg = StepArg.build(new String[]{
+        StepArg arg = StepArgParser.build(new String[]{
                 "-i", "x",
                 "-o", "fakeOutputPath",
                 "-cmd", "com.fulmicotone.spark.java.app.MyStep",
@@ -176,7 +171,6 @@ public class SparkAppTest {
                 .fullRun().getStep().unwrapDataset()
                 .get();
 
-
         Dataset onlyRunMethodResult = StepBox.newTest(sparkSession, arg)
                 .runOnly().getStep().unwrapDataset()
                 .get();
@@ -184,13 +178,8 @@ public class SparkAppTest {
         List<String> rExpected1 = Arrays.asList("RUN");
         List<String> rExpected2 = Arrays.asList("AFTERRUN","RUN","BEFORERUN");
 
-
         Assert.assertTrue( onlyRunMethodResult.collectAsList().stream().allMatch(rExpected1::contains));
-
         Assert.assertTrue( fullLifeCycleResult.collectAsList().stream().allMatch(rExpected2::contains));
 
     }
-
-
-
 }
