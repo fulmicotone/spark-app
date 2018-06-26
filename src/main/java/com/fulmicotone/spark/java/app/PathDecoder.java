@@ -5,11 +5,12 @@ import com.fulmicotone.spark.java.app.function.time.LocalDateToPartitionedString
 import com.fulmicotone.spark.java.app.function.time.LocalDateToPartitionedStringS3Path;
 import com.fulmicotone.spark.java.app.function.time.LocalDateToPeriodPartitionedStringPath;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class PathDecoder {
+public class PathDecoder implements Serializable {
 
     private final static String PATH_FORMAT = "%s/%s";
 

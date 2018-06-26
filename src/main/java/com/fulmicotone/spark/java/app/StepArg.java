@@ -1,85 +1,81 @@
 package com.fulmicotone.spark.java.app;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fulmicotone.spark.java.app.utils.EnviromentHandler;
 import com.fulmicotone.spark.java.app.utils.Enviroments;
-import com.fulmicotone.spark.java.app.utils.LocalDatetimeHandler;
-import org.kohsuke.args4j.Argument;
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
-import org.kohsuke.args4j.spi.StringArrayOptionHandler;
-import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
-public class StepArg {
+public class StepArg  implements Serializable {
 
-    private static org.slf4j.Logger log = LoggerFactory.getLogger(StepArg.class);
+    public StepArg() { }
 
-    private CmdLineParser cmdLineParser;
-
-    private Optional<CmdLineException> optException = Optional.empty();
-
-    private StepArg() {
-    }
-
-    @Option(name = "-i", usage = "resources input folder", required = false)
     public String inputPath;
-    @Option(name = "-o", usage = "resources output run something", required = false)
     public String outputPath;
-    @Option(name = "-cmd", usage = "command to run")
     public String command;
-    @Option(name = "-sdt", usage = "scheduled Date", handler = LocalDatetimeHandler.class, required = false)
     public LocalDateTime scheduledDateTime;
-    @Option(name = "-edt", usage = "execution Date", handler = LocalDatetimeHandler.class, required = false)
     public LocalDateTime executionDateTime;
-    @Option(name = "-env", usage = "enviroment prod or dev", handler = EnviromentHandler.class, required = false)
     public Enviroments enviroment = Enviroments.prod;
-
-    @Argument(handler = StringArrayOptionHandler.class)
     public List<String> options = new ArrayList<String>();
+    public HashMap<String,String> optionsAsMap=new HashMap<>();
 
-    public static StepArg build(String[] args) {
-
-        StepArg sa = new StepArg();
-
-        try {
-            CmdLineParser parser = new CmdLineParser(sa);
-            sa.cmdLineParser = parser;
-            parser.parseArgument(args);
-            log.debug("Arguments:{}", sa.asJson());
-        } catch (CmdLineException e) {
-            sa.optException = Optional.of(e);
-        }
-        return sa;
+    public String getInputPath() {
+        return inputPath;
     }
 
-
-    public void exitOnErrorPrintUsage() {
-
-        if (this.optException.isPresent()) {
-            cmdLineParser.printUsage(System.err);
-            System.exit(0);
-        }
-
+    public void setInputPath(String inputPath) {
+        this.inputPath = inputPath;
     }
 
+    public String getOutputPath() {
+        return outputPath;
+    }
 
-    public String asJson() {
-        try {
-            return new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT).writeValueAsString(this);
+    public void setOutputPath(String outputPath) {
+        this.outputPath = outputPath;
+    }
 
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return null;
-        }
+    public String getCommand() {
+        return command;
+    }
+
+    public void setCommand(String command) {
+        this.command = command;
+    }
+
+    public LocalDateTime getScheduledDateTime() {
+        return scheduledDateTime;
+    }
+
+    public void setScheduledDateTime(LocalDateTime scheduledDateTime) {
+        this.scheduledDateTime = scheduledDateTime;
+    }
+
+    public LocalDateTime getExecutionDateTime() {
+        return executionDateTime;
+    }
+
+    public void setExecutionDateTime(LocalDateTime executionDateTime) {
+        this.executionDateTime = executionDateTime;
+    }
+
+    public Enviroments getEnviroment() {
+        return enviroment;
+    }
+
+    public void setEnviroment(Enviroments enviroment) {
+        this.enviroment = enviroment;
+    }
+
+    public List<String> getOptions() {
+        return options;
+    }
+
+    public void setOptions(List<String> options) {
+        this.options = options;
     }
 
 }
