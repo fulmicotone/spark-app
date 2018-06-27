@@ -20,6 +20,15 @@ public class StepArg  implements Serializable {
     public LocalDateTime executionDateTime;
     public Enviroments enviroment = Enviroments.prod;
     public List<String> options = new ArrayList<String>();
+
+    public HashMap<String, String> getOptionsAsMap() {
+        return optionsAsMap;
+    }
+
+    public void setOptionsAsMap(HashMap<String, String> optionsAsMap) {
+        this.optionsAsMap = optionsAsMap;
+    }
+
     public HashMap<String,String> optionsAsMap=new HashMap<>();
 
     public String getInputPath() {
