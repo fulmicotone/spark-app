@@ -2,6 +2,8 @@ package com.fulmicotone.spark.java.app;
 
 import com.fulmicotone.spark.java.app.function.Functions;
 import com.fulmicotone.spark.java.app.function.spark.SparkSessionFactoryFn;
+import com.fulmicotone.spark.java.app.function.time.DeepLocalDateToPartitionedStringAWSPath;
+import com.fulmicotone.spark.java.app.function.time.DeepLocalDateToPartitionedStringPath;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
@@ -13,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -41,6 +44,7 @@ public class SparkAppTest {
                         "-cmd", "notNeedHere",
                         "-sdt", "2018-03-01T13:11:24",
                         "-edt", "2018-03-01T13:11:24",
+                        "-env","local"});
 
         sparkSession= new SparkSessionFactoryFn().apply(args );
 
@@ -153,6 +157,24 @@ public class SparkAppTest {
 
 
     @Test
+    public void deepLocalDateTest(){
+
+
+        Iterator<String> i = Arrays.asList(
+                "2018/03/01/13",
+                "year=2018/month=03/day=01/hour=13").iterator();
+
+        Arrays.asList(
+                new DeepLocalDateToPartitionedStringAWSPath().apply(args.scheduledDateTime),
+                new DeepLocalDateToPartitionedStringPath().apply(args.scheduledDateTime)).stream()
+                .peek(System.out::println)
+                .forEach(i.next()::equals);
+        
+    }
+
+
+
+    @Test
     public void stepBoxTest(){
 
         StepArg arg = StepArgParser.build(new String[]{
@@ -161,7 +183,7 @@ public class SparkAppTest {
                 "-cmd", "com.fulmicotone.spark.java.app.MyStep",
                 "-sdt", "2018-05-23T23:59:00",
                 "-edt", "2018-05-23T23:59:00",
-                "-env","local",
+                "-env", "local",
                 "o",
                 "f"
         });
