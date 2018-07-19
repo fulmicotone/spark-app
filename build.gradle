@@ -1,5 +1,5 @@
 group 'com.fulmicotone'
-version 'v2018.06.002'
+version 'v2018.07.002'
 
 apply plugin: 'java'
 
