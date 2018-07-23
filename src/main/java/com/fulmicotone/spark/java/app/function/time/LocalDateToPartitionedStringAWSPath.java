@@ -4,7 +4,7 @@ import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.util.function.Function;
 
-public class LocalDateToPartitionedStringS3Path implements Function<LocalDateTime,String> {
+public class LocalDateToPartitionedStringAWSPath implements Function<LocalDateTime,String> {
     @Override
     public String apply(LocalDateTime ldt) {
         DecimalFormat mFormat= new DecimalFormat("00");

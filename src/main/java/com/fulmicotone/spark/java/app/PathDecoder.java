@@ -2,7 +2,7 @@ package com.fulmicotone.spark.java.app;
 
 import com.fulmicotone.spark.java.app.function.path.WildOnPath;
 import com.fulmicotone.spark.java.app.function.time.LocalDateToPartitionedStringPath;
-import com.fulmicotone.spark.java.app.function.time.LocalDateToPartitionedStringS3Path;
+import com.fulmicotone.spark.java.app.function.time.LocalDateToPartitionedStringAWSPath;
 import com.fulmicotone.spark.java.app.function.time.LocalDateToPeriodPartitionedStringPath;
 
 import java.io.Serializable;
@@ -85,7 +85,7 @@ public class PathDecoder implements Serializable {
                              int wildDeepLevel) {
 
         String path= getAsString(direction, key) + "/" + (asAwsStream ?
-                new LocalDateToPartitionedStringS3Path().apply(ldt) :
+                new LocalDateToPartitionedStringAWSPath().apply(ldt) :
                 new LocalDateToPartitionedStringPath().apply(ldt));
 
        return new WildOnPath().apply(path,wildDeepLevel);
