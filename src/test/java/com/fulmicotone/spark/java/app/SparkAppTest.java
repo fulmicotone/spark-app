@@ -1,11 +1,12 @@
 package com.fulmicotone.spark.java.app;
 
-import com.fulmicotone.spark.java.app.function.Functions;
+import com.fulmicotone.spark.java.app.business.S3AddressExpander;
+import com.fulmicotone.spark.java.app.function.path.ApplyWildToS3Expander;
 import com.fulmicotone.spark.java.app.function.spark.SparkSessionFactoryFn;
 import com.fulmicotone.spark.java.app.function.time.DeepLocalDateToPartitionedStringAWSPath;
 import com.fulmicotone.spark.java.app.function.time.DeepLocalDateToPartitionedStringPath;
+import com.fulmicotone.spark.java.app.model.S3Address;
 import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -13,7 +14,9 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.File;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -92,7 +95,6 @@ public class SparkAppTest {
     @Test
     public void dataSupplierTest(){
 
-
         Dataset<Player> ds = DatasetSupplier.read(resourcePath + "/input/players/source.csv",
                 "csv", args, sparkSession,Structures.PLAYER).getAs(Player.class);
         
@@ -108,49 +110,100 @@ public class SparkAppTest {
 
 
     @Test
-    public void localDateToPeriodTest(){
+    public void testS3AddressExpander(){
+
+        LocalDateTime ltd = LocalDateTime.of(2018, 01, 10, 00, 00);
+
+        Iterator<String> i1 = S3AddressExpander.newOne()
+                .withSource(new S3Address("s3://ciao"))
+                .onPeriod(5,ChronoUnit.DAYS)
+                .startFrom(ltd).create()
+                .doExpansion()
+                .stream()
+                .map(S3Address::toString).collect(Collectors.toList()).iterator();
 
 
-        List<String> results = Arrays.asList(
-                "/input/players/year=2018/month=02/day=20/*",
-                "/input/players/year=2018/month=02/day=21/*",
-                "/input/players/year=2018/month=02/day=22/*",
-                "/input/players/year=2018/month=02/day=23/*",
-                "/input/players/year=2018/month=02/day=24/*",
-                "/input/players/year=2018/month=02/day=25/*",
-                "/input/players/year=2018/month=02/day=26/*",
-                "/input/players/year=2018/month=02/day=27/*",
-                "/input/players/year=2018/month=02/day=28/*",
-                "/input/players/year=2018/month=03/day=01/*");
-
-        //start date 2018 03 01
-        PathDecoder pathDecoder=new PathDecoder(args);
-
-        AtomicInteger atomicInteger=new AtomicInteger(-1);
-
-        List<String> sourcesPath = pathDecoder.getInputPathsByPeriod(args.scheduledDateTime, "players", 10, 1);
-
-        sourcesPath.stream()
-                .map(r->r.replace(resourcePath,"")).
-                 forEach(expectedResult-> {
-            String result = results.get(atomicInteger.incrementAndGet());
-
-            Assert
-                    .assertTrue(result+ " is different of expected:"
-                            +expectedResult,result.equals(expectedResult));
-        });
+        Iterator<String> i2 = S3AddressExpander.newOne()
+                .withSource(new S3Address("s3://ciao"))
+                .onPeriod(5,ChronoUnit.DAYS)
+                .sourceBucketIsPartitioned()
+                .startFrom(ltd).create()
+                .doExpansion()
+                .stream()
+                .map(S3Address::toString)
+                .collect(Collectors.toList()).iterator();
 
 
-        DatasetSupplier ds = Functions.readByPathList(sourcesPath, args, sparkSession, "csv");
+        Iterator<String> i3 = S3AddressExpander.newOne()
+                .withSource(new S3Address("s3://ciao"))
+                .onPeriod(5,ChronoUnit.HOURS)
+                .sourceBucketIsPartitioned()
+                .startFrom(ltd).create()
+                .doExpansion()
+                .stream()
+                .map(S3Address::toString)
+                .collect(Collectors.toList()).iterator();
 
-        int size= (int) ds.get().count();
-        Row lastRecord = ds.get().collectAsList().get(size - 1);
-        Row firstRecord = ds.get().collectAsList().get(0);
 
-        Assert.assertTrue("expected AdamDonachie  was:"+
-                firstRecord.getString(0),firstRecord.getString(0).equals("AdamDonachie"));
-        Assert.assertTrue(lastRecord.getString(0).equals("HaydenPenn"));
-        Assert.assertTrue("size expected:"+19+" was:"+size,size==19);
+        Iterator<String> i4 = S3AddressExpander.newOne()
+                .withSource(new S3Address("s3://ciao"))
+                .onPeriod(1,ChronoUnit.HOURS)
+                .sourceBucketIsPartitioned()
+                .startFrom(ltd)
+                .sourcePartitionedAsAWS(true)
+                .create()
+                .doExpansion()
+                .stream()
+                .map(S3Address::toString)
+                .collect(Collectors.toList()).iterator();
+
+
+        Iterator<String> i5 = new ApplyWildToS3Expander().apply(S3AddressExpander.newOne()
+                .withSource(new S3Address("s3://ciao"))
+                .onPeriod(5, ChronoUnit.DAYS)
+                .sourceBucketIsPartitioned()
+                .startFrom(ltd).create(), 2)
+                .stream()
+                .map(S3Address::toString)
+                .iterator();
+
+        Arrays.asList(
+                "s3://ciao/2018/01/09/*",
+                "s3://ciao/2018/01/08/*",
+                "s3://ciao/2018/01/07/*",
+                "s3://ciao/2018/01/06/*"
+        ).stream().forEach(r-> Assert.assertTrue( r.equals(i1.next())));
+
+        Arrays.asList("s3://ciao/year=2018/month=01/day=09/*",
+                "s3://ciao/year=2018/month=01/day=08/*",
+                "s3://ciao/year=2018/month=01/day=07/*",
+                "s3://ciao/year=2018/month=01/day=06/*"
+        ).stream().forEach(r-> Assert.assertTrue( r.equals(i2.next())));
+
+
+
+        Arrays.asList("s3://ciao/year=2018/month=01/day=09/hour=23/*",
+                "s3://ciao/year=2018/month=01/day=09/hour=22/*",
+                "s3://ciao/year=2018/month=01/day=09/hour=21/*",
+                "s3://ciao/year=2018/month=01/day=09/hour=20/*"
+        ).stream().forEach(r-> Assert.assertTrue( r.equals(i3.next())));
+
+
+
+
+        Arrays.asList("s3://ciao/2018/01/09/23/*"
+        ).stream().forEach(r-> Assert.assertTrue( r.equals(i4.next())));
+
+
+
+        Arrays.asList("s3://ciao/year=2018/month=01/day=09/*/*",
+                "s3://ciao/year=2018/month=01/day=08/*/*",
+                "s3://ciao/year=2018/month=01/day=07/*/*",
+                "s3://ciao/year=2018/month=01/day=06/*/*"
+        ).stream()
+                .peek(System.out::println)
+                .forEach(r-> Assert.assertTrue( r.equals(i5.next())));
+
 
     }
 

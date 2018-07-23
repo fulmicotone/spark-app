@@ -1,26 +1,34 @@
 package com.fulmicotone.spark.java.app;
 
+import com.fulmicotone.spark.java.app.business.S3AddressExpander;
 import com.fulmicotone.spark.java.app.exceptions.UnknownCommandException;
 import com.fulmicotone.spark.java.app.function.Functions;
+import com.fulmicotone.spark.java.app.function.path.ApplyWildToS3Expander;
 import com.fulmicotone.spark.java.app.function.spark.NewStepInstance;
+import com.fulmicotone.spark.java.app.model.S3Address;
 import com.fulmicotone.spark.java.app.utils.AppPropertiesProvider;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
+import org.apache.spark.sql.DataFrameReader;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.StructType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URI;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 
 /**
@@ -58,13 +66,27 @@ public abstract class Step implements Serializable{
 
     //todo test
     protected DatasetSupplier readByPeriod(String key,
-                                      String format,
-                                      int days,
+                                           String format,
+                                           int period,
+                                           ChronoUnit unit,
                                            int wildDeepLevel,
-                                      StructType... structType){
-        return    Functions.readByPathList( pathDecoder
-                .getInputPathsByPeriod(arg.scheduledDateTime, key, days, wildDeepLevel),
-                arg,SparkSession.getActiveSession().get(),format,structType);
+                                           StructType... structType){
+
+        List<String> s3PathList = new ApplyWildToS3Expander()
+                .apply( S3AddressExpander.newOne()
+                .checkExistenceOnS3()
+                .withSource(new S3Address(arg.inputPath + "/" + key))
+                .onPeriod(period, unit)
+                .startFrom(arg.scheduledDateTime)
+                .create(),wildDeepLevel).stream().map(S3Address::toString).collect(Collectors.toList());
+
+        DataFrameReader dataFrameReader = SparkSession.getActiveSession().get().read().format(format);
+
+        if(structType.length>0){ dataFrameReader=dataFrameReader.schema(structType[0]);}
+
+        return DatasetSupplier
+                .create(SparkSession.getActiveSession().get(),
+                        arg,   dataFrameReader.load( s3PathList.toArray(new String[]{})));
     }
 
     protected DatasetSupplier readOnDate(String key,

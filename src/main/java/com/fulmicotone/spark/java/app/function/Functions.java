@@ -61,31 +61,4 @@ public class Functions {
 
 
 
-    public static DatasetSupplier readByPathList(List<String> pathList,
-                                              StepArg arg,
-                                              SparkSession sp,
-                                              String format,
-                                              StructType ... structType){
-
-
-
-
-        Dataset targetDS = null;
-
-        for(String sourcePath:pathList){
-
-            try {
-                System.out.println("reading sourcesPath:" + sourcePath);
-
-                targetDS = targetDS == null ? DatasetSupplier.read(sourcePath, format, arg,
-                        sp, structType).get() : targetDS.union(DatasetSupplier.read(sourcePath, format, arg,
-                        sp, structType).get());
-
-            }catch (Exception ex){
-                System.out.println("problem reading sourcesPath:" + sourcePath+" SKIPPED");
-            }
-        }
-
-        return DatasetSupplier.create(sp,arg,targetDS);
-    }
 }

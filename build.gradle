@@ -1,5 +1,5 @@
 group 'com.fulmicotone'
-version 'v2018.07.002'
+version 'v2018.07.003'
 
 apply plugin: 'java'
 
@@ -12,6 +12,8 @@ dependencies {
     implementation group: 'args4j', name: 'args4j', version: '2.33'
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
     implementation group: 'org.apache.spark', name: 'spark-sql_2.11', version: '2.2.0'
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.371'
+
 
 }
 
