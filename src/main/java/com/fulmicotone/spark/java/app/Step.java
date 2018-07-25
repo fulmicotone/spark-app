@@ -65,7 +65,7 @@ public abstract class Step implements Serializable{
     protected Properties appProperties(){ return this.appProp;}
 
     //todo test
-    protected DatasetSupplier readByPeriod(String key,
+    protected DatasetSupplier readByPeriod(String address,
                                            String format,
                                            boolean isAwsPartitioned,
                                            int period,
@@ -77,7 +77,7 @@ public abstract class Step implements Serializable{
                 .apply( S3AddressExpander.newOne()
                         .sourcePartitionedAsAWS(isAwsPartitioned)
                 .checkExistenceOnS3()
-                .withSource(new S3Address(arg.inputPath + "/" + key))
+                .withSource(new S3Address(address))
                 .onPeriod(period, unit)
                 .startFrom(arg.scheduledDateTime)
                 .create(),wildDeepLevel).stream().map(S3Address::toString).collect(Collectors.toList());
