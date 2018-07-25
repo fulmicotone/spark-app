@@ -28,7 +28,8 @@ public class FnS3AddressExpander implements Function<S3AddressExpander,List<S3Ad
 
         boolean isHoursPrecision = s3AddressExpander.chronUnit.equals(ChronoUnit.HOURS);
 
-        Stream<S3Address> y = IntStream.rangeClosed(1, s3AddressExpander.period)
+        Stream<S3Address> y = IntStream
+                .rangeClosed(s3AddressExpander.period==0?0:1, s3AddressExpander.period)
                 .mapToObj(i -> s3AddressExpander.localDateTime.minus(i, s3AddressExpander.chronUnit))
                 .map((s3AddressExpander.isAmazonFormat ?
                         isHoursPrecision? new DeepLocalDateToPartitionedStringAWSPath() :

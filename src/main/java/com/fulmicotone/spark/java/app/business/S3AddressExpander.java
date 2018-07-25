@@ -95,7 +95,7 @@ public class S3AddressExpander {
 
         public S3AddressExpander create(){
             Objects.requireNonNull(rootAddress,"s3 root address is required!" );
-            assert this.period >0;
+            assert this.period >-1;
             assert this.rootAddress.isWild()==false;
             return new S3AddressExpander(
                     this.localDateTime,

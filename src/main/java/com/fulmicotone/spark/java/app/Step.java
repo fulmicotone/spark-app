@@ -67,6 +67,7 @@ public abstract class Step implements Serializable{
     //todo test
     protected DatasetSupplier readByPeriod(String key,
                                            String format,
+                                           boolean isAwsPartitioned,
                                            int period,
                                            ChronoUnit unit,
                                            int wildDeepLevel,
@@ -74,6 +75,7 @@ public abstract class Step implements Serializable{
 
         List<String> s3PathList = new ApplyWildToS3Expander()
                 .apply( S3AddressExpander.newOne()
+                        .sourcePartitionedAsAWS(isAwsPartitioned)
                 .checkExistenceOnS3()
                 .withSource(new S3Address(arg.inputPath + "/" + key))
                 .onPeriod(period, unit)
@@ -89,17 +91,20 @@ public abstract class Step implements Serializable{
                         arg,   dataFrameReader.load( s3PathList.toArray(new String[]{})));
     }
 
-    protected DatasetSupplier readOnDate(String key,
+    protected DatasetSupplier readOnDate(String address,
                                          String format,
                                          int wildDeepLevel,
+                                         ChronoUnit unit,
                                          boolean awsStreamFolder,
                                          StructType... structType){
-        return  DatasetSupplier.read(
-                awsStreamFolder?pathDecoder.getInputAWSPath(arg.scheduledDateTime, key, wildDeepLevel):
-                        pathDecoder.getInputPath(arg.scheduledDateTime, key, wildDeepLevel),
+        return  readByPeriod(
+                address,
                 format,
-                this.arg,
-                SparkSession.getActiveSession().get(),structType);
+                awsStreamFolder,
+                0,
+                unit,
+                wildDeepLevel,
+                structType);
     }
 
     protected  void wrapDataset(Dataset ds){

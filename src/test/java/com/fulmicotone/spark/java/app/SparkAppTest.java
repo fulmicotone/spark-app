@@ -167,6 +167,17 @@ public class SparkAppTest {
                 .map(S3Address::toString)
                 .iterator();
 
+
+        Iterator<String> i6 = new ApplyWildToS3Expander().apply(S3AddressExpander.newOne()
+                .withSource(new S3Address("s3://ciao"))
+                .onPeriod(0, ChronoUnit.DAYS)
+                .sourceBucketIsPartitioned()
+                .startFrom(ltd).create(), 2)
+                .stream()
+                .map(S3Address::toString)
+                .peek(System.out::println)
+                .iterator();
+
         Arrays.asList(
                 "s3://ciao/2018/01/09/*",
                 "s3://ciao/2018/01/08/*",
@@ -201,8 +212,14 @@ public class SparkAppTest {
                 "s3://ciao/year=2018/month=01/day=07/*/*",
                 "s3://ciao/year=2018/month=01/day=06/*/*"
         ).stream()
-                .peek(System.out::println)
+
                 .forEach(r-> Assert.assertTrue( r.equals(i5.next())));
+
+
+        Arrays.asList("s3://ciao/year=2018/month=01/day=10/*/*"
+        ).stream()
+
+                .forEach(r-> Assert.assertTrue( r.equals(i6.next())));
 
 
     }
@@ -257,4 +274,29 @@ public class SparkAppTest {
         Assert.assertTrue( fullLifeCycleResult.collectAsList().stream().allMatch(rExpected2::contains));
 
     }
+
+
+
+    @Test
+    public void testS3AddressObject(){
+
+        String s3Path="s3://prod-audiencerate-aws-kinesis/firehose/raw/match-table/*/*/*";
+
+        String s3Path2="s3://prod-audiencerate-aws-kinesis/firehose/raw/match-table";
+
+
+        S3Address s3add = new S3Address(s3Path);
+
+        S3Address s3add2 = new S3Address(s3Path2);
+
+        Assert.assertTrue(String.format("expected %s found %s",s3Path,s3add.toString()),
+                s3Path.equals(s3add.toString()));
+
+        Assert.assertTrue(String.format("expected %s found %s",s3Path2,s3add2.toString()),
+                s3Path2.equals(s3add2.toString()));
+
+
+
+    }
+
 }
