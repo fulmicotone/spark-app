@@ -37,9 +37,11 @@ public class FnParquetConverter implements BiFunction<SparkSession,ParquetConver
                         .collect(Collectors.toList()).toArray(new String[]{}));
 
 
+        rowDataset=parquetConverter.transformation.apply(rowDataset);
+
         if(parquetConverter.partitionSize!=-1){  rowDataset=rowDataset.coalesce(parquetConverter.partitionSize);}
 
-        parquetConverter.transformation.apply(rowDataset)
+        rowDataset
                       .write()
                      .partitionBy(parquetConverter.partitions)
                      .mode(SaveMode.Append)
