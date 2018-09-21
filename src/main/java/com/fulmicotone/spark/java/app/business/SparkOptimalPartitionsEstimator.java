@@ -16,10 +16,9 @@ public  class SparkOptimalPartitionsEstimator extends OptimalPartitionsEstimator
      */
     public SparkOptimalPartitionsEstimator(SparkContext c) {
 
-        super(c.conf().getInt(spark_executor_cores,2), c.conf()
-                .getInt(spark_executor_cores,2)*
-                c.conf().getInt(spark_executor_instances,
-                        c.getExecutorStorageStatus().length - 1));
+        super(c.conf().getInt(spark_executor_cores,2),
+               c.conf().getInt(spark_executor_cores,2)*
+                c.conf().getInt(spark_executor_instances, c.getExecutorStorageStatus().length - 1));
         this.c=c;
     }
 
