@@ -70,15 +70,41 @@ public class ParquetConverterRequest implements Serializable {
         private Function<Dataset<Row>, Dataset<Row>> transformation=dataset->dataset;
 
         private Builder(){ }
+
+        /**
+         * list of s3 bucket containing original source files
+         * @param addresses
+         * @return
+         */
         public Builder from(List<S3Address> addresses){this.inputs=addresses; return this;}
 
         public Builder from(S3Address address){this.inputs=Arrays.asList(address);return this;}
+
+        /**
+         *
+         * @param address output s3 bucket
+         * @return
+         */
         public Builder to(S3Address address){this.output=address;return this;}
+
+        /**
+         *
+         * @param format file format input
+         * @return
+         */
         public Builder format(FileFormat format){ this. format=format;return this;}
 
+        /**
+         * transformation function source=> target
+         * @param fn
+         * @return
+         */
         public Builder withTransformation(Function<Dataset<Row>,Dataset<Row>> fn){ this.transformation=fn;return this;}
+
         public Builder partitionBy(String [] partitions){ this.partitions=partitions;return this;}
+
         public Builder withPartitionSize(int partitionSize){ this.partitionSize=partitionSize;return this; }
+
         public Builder withSchema(StructType schema){ this.structTypeOpt=Optional.of(schema);return this;}
 
         public ParquetConverterRequest create(){
