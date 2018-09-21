@@ -26,7 +26,7 @@ public class OptimalPartitionsEstimator implements Serializable {
     public OptimalPartitionsEstimator(int minPartitions,int maxPartitions){
 
         this.minPartitions=minPartitions;
-        this.maxPartitions=maxPartitions;
+        this.maxPartitions=maxPartitions==0?200:maxPartitions;
 
 
     }
