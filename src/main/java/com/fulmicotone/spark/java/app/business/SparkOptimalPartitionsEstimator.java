@@ -29,6 +29,14 @@ public  class SparkOptimalPartitionsEstimator extends OptimalPartitionsEstimator
     }
 
 
+    public  int estimatePartition( long datasetObjectSize, long collectionSize ){
+
+        return    estimatePartition(datasetObjectSize, collectionSize,c.conf()
+                .getSizeAsBytes(spark_executor_memory));
+    }
+
+
+
 
 }
 
