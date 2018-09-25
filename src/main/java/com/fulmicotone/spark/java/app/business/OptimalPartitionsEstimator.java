@@ -36,9 +36,19 @@ public class OptimalPartitionsEstimator implements Serializable {
                                            long collectionSize,
                                            long executorMemoryBytes){
 
+        return    this.estimatePartition(SizeEstimator.estimate(datasetObject),collectionSize ,executorMemoryBytes );
+    }
+
+
+
+
+    public  int estimatePartition(long singleObjectSizeBytes,
+                                  long collectionSize,
+                                  long executorMemoryBytes){
+
         long singleExecutorMemoryBytes = (long) (executorMemoryBytes *
-                        executor_memory_safety_percentage*
-                        executor_memory_storage_percentage);
+                executor_memory_safety_percentage*
+                executor_memory_storage_percentage);
 
 
         log.info("collections size:"+collectionSize);
@@ -47,11 +57,11 @@ public class OptimalPartitionsEstimator implements Serializable {
 
         log.info("singleExecutorMemoryBytes:"+singleExecutorMemoryBytes+" bytes");
 
-        long singleObjectSize = SizeEstimator.estimate(datasetObject);
 
-        log.info("single record:"+singleObjectSize+" bytes");
 
-        long collectionSizeInBytes=singleObjectSize*collectionSize;
+        log.info("single record:"+singleObjectSizeBytes+" bytes");
+
+        long collectionSizeInBytes=singleObjectSizeBytes*collectionSize;
 
         log.info("collectionSizeInBytes:"+collectionSizeInBytes+" bytes");
 
@@ -64,6 +74,7 @@ public class OptimalPartitionsEstimator implements Serializable {
         log.info("optimal partitioning with: "+partitions+" partitions");
 
         return partitions;
+
 
     }
 
