@@ -8,7 +8,6 @@ import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.SparkSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
@@ -31,7 +30,8 @@ public class FnParquetConverter implements BiFunction<SparkSession,ParquetConver
          if(parquetConverter.inputs.size()==0){
 
              log.info("no inputs paths is passed");
-             return true;}
+         return false;
+         }
 
         Dataset<Row> rowDataset= sp
                 .read()
