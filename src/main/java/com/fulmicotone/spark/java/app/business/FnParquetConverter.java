@@ -27,6 +27,12 @@ public class FnParquetConverter implements BiFunction<SparkSession,ParquetConver
                       ParquetConverterRequest parquetConverter) {
 
 
+
+         if(parquetConverter.inputs.size()==0){
+
+             log.info("no inputs paths is passed");
+             return true;}
+
         Dataset<Row> rowDataset= sp
                 .read()
                 .schema(parquetConverter.schema)
