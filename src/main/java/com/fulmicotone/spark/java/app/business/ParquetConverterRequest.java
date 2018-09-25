@@ -48,16 +48,10 @@ public class ParquetConverterRequest implements Serializable {
     }
 
 
-
-
     public static Builder newOne(){return new Builder();}
 
 
-    public Boolean doConvert(SparkSession spark){
-
-        return new FnParquetConverter().apply(spark,this);
-
-    }
+    public Boolean doConvert(SparkSession spark){ return new FnParquetConverter().apply(spark,this); }
 
     public static class Builder{
 
