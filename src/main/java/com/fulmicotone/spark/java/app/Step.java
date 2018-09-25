@@ -82,6 +82,13 @@ public abstract class Step implements Serializable{
                 .startFrom(arg.scheduledDateTime)
                 .create(),wildDeepLevel).stream().map(S3Address::toString).collect(Collectors.toList());
 
+        if(s3PathList.size()==0){  log.info("there's nothing to read, cause no s3 path is passed");
+
+           return DatasetSupplier
+                    .create(SparkSession.getActiveSession().get(),
+                            arg, SparkSession.getActiveSession().get().emptyDataFrame());
+        }
+
         DataFrameReader dataFrameReader = SparkSession.getActiveSession().get().read().format(format);
 
         if(structType.length>0){ dataFrameReader=dataFrameReader.schema(structType[0]);}
