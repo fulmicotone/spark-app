@@ -3,6 +3,8 @@ package com.fulmicotone.spark.java.app.business;
 import  static com.fulmicotone.spark.java.app.utils.SparkConstantsProperties.*;
 import org.apache.spark.SparkContext;
 
+import java.util.Optional;
+
 
 public  class SparkOptimalPartitionsEstimator extends OptimalPartitionsEstimator {
 
@@ -22,7 +24,11 @@ public  class SparkOptimalPartitionsEstimator extends OptimalPartitionsEstimator
         this.c=c;
     }
 
+
+
     public  int estimatePartition( Object datasetObject, long collectionSize ){
+
+
 
         return    estimatePartition(datasetObject, collectionSize,c.conf()
                 .getSizeAsBytes(spark_executor_memory));

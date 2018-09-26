@@ -16,6 +16,7 @@ import org.apache.spark.sql.DataFrameReader;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.catalyst.encoders.RowEncoder;
 import org.apache.spark.sql.types.StructType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,6 +74,9 @@ public abstract class Step implements Serializable{
                                            int wildDeepLevel,
                                            StructType... structType){
 
+
+        SparkSession sp = SparkSession.getActiveSession().get();
+
         List<String> s3PathList = new ApplyWildToS3Expander()
                 .apply( S3AddressExpander.newOne()
                         .sourcePartitionedAsAWS(isAwsPartitioned)
@@ -85,17 +89,20 @@ public abstract class Step implements Serializable{
         if(s3PathList.size()==0){  log.info("there's nothing to read, cause no s3 path is passed");
 
            return DatasetSupplier
-                    .create(SparkSession.getActiveSession().get(),
-                            arg, SparkSession.getActiveSession().get().emptyDataFrame());
+                    .create(sp,
+                            arg, structType.length==0?sp.emptyDataFrame()
+                                    :sp.emptyDataset(RowEncoder.apply(structType[0])));
         }
 
-        DataFrameReader dataFrameReader = SparkSession.getActiveSession().get().read().format(format);
+        DataFrameReader dataFrameReader = sp.read().format(format);
 
         if(structType.length>0){ dataFrameReader=dataFrameReader.schema(structType[0]);}
 
         return DatasetSupplier
-                .create(SparkSession.getActiveSession().get(),
-                        arg,   dataFrameReader.load( s3PathList.toArray(new String[]{})));
+                .create(sp,
+                        arg,
+                        dataFrameReader
+                                .load( s3PathList.toArray(new String[]{})));
     }
 
     protected DatasetSupplier readOnDate(String address,
