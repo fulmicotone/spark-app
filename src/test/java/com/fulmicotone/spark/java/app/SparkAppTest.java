@@ -1,5 +1,6 @@
 package com.fulmicotone.spark.java.app;
 
+import com.fulmicotone.spark.java.app.business.FnS3ListWeigh;
 import com.fulmicotone.spark.java.app.business.S3AddressExpander;
 import com.fulmicotone.spark.java.app.function.path.ApplyWildToS3Expander;
 import com.fulmicotone.spark.java.app.function.spark.SparkSessionFactoryFn;
@@ -298,5 +299,38 @@ public class SparkAppTest {
 
 
     }
+
+
+
+    @Test
+    public void testS3WighFunction(){
+
+
+
+        LocalDateTime ltd = LocalDateTime.of(2018, 9, 26, 00, 00);
+
+        List<S3Address> l = S3AddressExpander.newOne()
+                .withSource(new S3Address("s3://prod-etl-output/parquet-raw-data/sync-operation"))
+                .onPeriod(1, ChronoUnit.DAYS)
+                .startFrom(ltd)
+                .sourceBucketIsPartitioned()
+                .create()
+                .doExpansion()
+                .stream()
+                .peek(System.out::println)
+                .collect(Collectors.toList());
+
+
+        Long x = new FnS3ListWeigh().apply(l);
+
+
+
+        System.out.println(x);
+
+
+
+    }
+
+
 
 }
