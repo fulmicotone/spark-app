@@ -45,9 +45,13 @@ import java.util.stream.Collectors;
 public abstract class Step implements Serializable{
 
     protected static Logger log= LoggerFactory.getLogger(Step.class);
+
     private StepArg arg;
+
     private Properties appProp=new AppPropertiesProvider().get();
+
     private PathDecoder pathDecoder;
+
     private Dataset keptDataset ;
 
     protected Step(){}
@@ -65,7 +69,18 @@ public abstract class Step implements Serializable{
 
     protected Properties appProperties(){ return this.appProp;}
 
-    //todo test
+    /**
+     * Datasupplier will be removed soon
+     * @param address
+     * @param format
+     * @param isAwsPartitioned
+     * @param period
+     * @param unit
+     * @param wildDeepLevel
+     * @param structType
+     * @return
+     */
+    @Deprecated
     protected DatasetSupplier readByPeriod(String address,
                                            String format,
                                            boolean isAwsPartitioned,
@@ -105,6 +120,18 @@ public abstract class Step implements Serializable{
                                 .load( s3PathList.toArray(new String[]{})));
     }
 
+
+    /**
+     * Datasupplier object will be removed soon
+     * @param address
+     * @param format
+     * @param wildDeepLevel
+     * @param unit
+     * @param awsStreamFolder
+     * @param structType
+     * @return
+     */
+    @Deprecated
     protected DatasetSupplier readOnDate(String address,
                                          String format,
                                          int wildDeepLevel,

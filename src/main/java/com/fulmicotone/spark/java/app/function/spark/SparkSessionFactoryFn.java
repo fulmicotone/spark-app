@@ -12,11 +12,11 @@ public class SparkSessionFactoryFn implements Function<StepArg,SparkSession> {
 
     @Override
     public SparkSession apply(StepArg arg) {
+            SparkSession.Builder builder= SparkSession.builder().appName(arg.command+" - app")
+                    .config("spark.ui.enabled",false );
 
-
-            SparkSession.Builder builder= SparkSession.builder().appName(arg.command+" - app");
             if(arg.enviroment== Enviroments.local){
-                builder.master("local"); }
+                builder.master("local[3]"); }
             SparkSession session= builder.getOrCreate();
           //  if(arg.enviroment==Enviroments.local){ session.sparkContext().setLogLevel(Level.ERROR.toString());};
             return session;

@@ -21,8 +21,7 @@ public class MyStep extends Step {
     protected void run(StepArg arg, SparkSession sparkSession) {
 
 
-
-       wrapDataset(unwrapDataset().orElse(sparkSession.emptyDataset(Encoders.STRING())).union(sparkSession
+        wrapDataset(unwrapDataset().orElse(sparkSession.emptyDataset(Encoders.STRING())).union(sparkSession
                .createDataset(Arrays.asList("RUN"), Encoders.STRING())));
 
 

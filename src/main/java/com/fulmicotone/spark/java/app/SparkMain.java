@@ -2,7 +2,6 @@ package com.fulmicotone.spark.java.app;
 
 
 import com.fulmicotone.spark.java.app.function.spark.SparkSessionFactoryFn;
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.spark.sql.SparkSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +28,9 @@ public class SparkMain implements ISparkApp<String>{
 
         } catch (Exception e) {
 
+
             log.error("error in SparkMain:"+appArgs.command);
+
             throw e;
         }
     }

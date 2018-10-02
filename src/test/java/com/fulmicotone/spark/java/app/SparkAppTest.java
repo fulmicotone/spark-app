@@ -2,6 +2,7 @@ package com.fulmicotone.spark.java.app;
 
 import com.fulmicotone.spark.java.app.business.FnS3ListWeigh;
 import com.fulmicotone.spark.java.app.business.S3AddressExpander;
+import com.fulmicotone.spark.java.app.business.listeners.MyJobProgressListener;
 import com.fulmicotone.spark.java.app.function.path.ApplyWildToS3Expander;
 import com.fulmicotone.spark.java.app.function.spark.SparkSessionFactoryFn;
 import com.fulmicotone.spark.java.app.function.time.DeepLocalDateToPartitionedStringAWSPath;
@@ -9,6 +10,7 @@ import com.fulmicotone.spark.java.app.function.time.DeepLocalDateToPartitionedSt
 import com.fulmicotone.spark.java.app.model.S3Address;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.SparkSession;
+import org.apache.spark.ui.jobs.JobProgressListener;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -326,6 +328,41 @@ public class SparkAppTest {
 
 
         System.out.println(x);
+
+
+
+    }
+
+
+
+    @Test
+    public void myStepTest(){
+
+
+        StepArg arg = StepArgParser.build(new String[]{
+                "-i", "x",
+                "-o", "fakeOutputPath",
+                "-cmd", "com.fulmicotone.spark.java.app.ExeStep",
+                "-sdt", "2018-05-23T23:59:00",
+                "-edt", "2018-05-23T23:59:00",
+                "-env", "local",
+                "o",
+                "f"
+        });
+
+
+
+
+        sparkSession.sparkContext().addSparkListener(new MyJobProgressListener());
+
+
+        StepBox.newTest(sparkSession, arg)
+                .runOnly().getStep().unwrapDataset()
+                .get();
+
+
+
+
 
 
 
