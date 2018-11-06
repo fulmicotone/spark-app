@@ -57,6 +57,33 @@ public class SparkAppTest {
     }
 
 
+    @Test
+    public void stepArgParameters(){
+
+        String outpathVal="s3://prova-dino/client=myclient/container=custom/file=CUSTOM_171342_3442741_30.csv.gz";
+        String filePathVal="s3://prova-dino/client=myclient/container=custom/file=CUSTOM_171342_3442741_30.csv.gz";
+        String filenameVal="web_ciao-prova-x-*=.csv";
+        String debugModeVal="false";
+        String paramVal="paramVal";
+        StepArg stepArg = StepArgParser.build(new String[]{
+                "-sdt", "2018-11-05T16:42:26.828",
+                "-edt", "2018-11-05T16:42:26.828",
+                "-cmd", "com.mycompany.spark.steps.mystep.Step",
+                "file_path="+filePathVal,
+                "file_name="+filenameVal,
+                "-o", outpathVal,
+                "debug_mode="+debugModeVal,
+                "param="+paramVal
+        }).toAppArgs();
+
+        Assert.assertTrue(stepArg.outputPath.equals(outpathVal));
+        Assert.assertTrue(stepArg.optionsAsMap.get("file_name").equals(filenameVal));
+        Assert.assertTrue(stepArg.optionsAsMap.get("file_path").equals(filePathVal));
+        Assert.assertTrue(stepArg.optionsAsMap.get("param").equals(paramVal));
+        Assert.assertTrue(stepArg.optionsAsMap.get("debug_mode").equals(debugModeVal));
+
+    }
+
 
     @Test
     public void pathDecoderTest(){
@@ -302,7 +329,7 @@ public class SparkAppTest {
 
 
 
-    @Test
+ //   @Test
     public void testS3WighFunction(){
 
 
@@ -310,7 +337,7 @@ public class SparkAppTest {
         LocalDateTime ltd = LocalDateTime.of(2018, 9, 26, 00, 00);
 
         List<S3Address> l = S3AddressExpander.newOne()
-                .withSource(new S3Address("s3://prod-etl-output/parquet-raw-data/sync-operation"))
+                .withSource(new S3Address("s3://prova/parquet-rrr-f/sync-ofperation"))
                 .onPeriod(1, ChronoUnit.DAYS)
                 .startFrom(ltd)
                 .sourceBucketIsPartitioned()

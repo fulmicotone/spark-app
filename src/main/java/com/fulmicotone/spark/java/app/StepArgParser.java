@@ -8,6 +8,7 @@ import com.fulmicotone.spark.java.app.utils.EnviromentHandler;
 import com.fulmicotone.spark.java.app.utils.Enviroments;
 import com.fulmicotone.spark.java.app.utils.LocalDatetimeHandler;
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.lang.math.IntRange;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -18,6 +19,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.IntStream;
 
 public class StepArgParser extends  StepArg {
 
@@ -27,7 +29,7 @@ public class StepArgParser extends  StepArg {
 
     private Optional<CmdLineException> optException = Optional.empty();
 
-    private final Predicate<String> isMapOption =(s)->s.split("=").length==2;
+    private final Predicate<String> isMapOption =(s)->s.split("=").length>=2;
 
     public StepArgParser() { }
 
@@ -77,7 +79,9 @@ public class StepArgParser extends  StepArg {
 
         if(isMapOption.test(opt)){
             String[] keyVal = opt.split("=");
-            optionsAsMap.put(keyVal[0],keyVal[1] );
+
+            optionsAsMap.put(keyVal[0],IntStream.range(1,keyVal.length )
+                    .mapToObj(i->keyVal[i]).reduce((x,y)->x+"="+y).get() );
             return;
         }
         options.add(opt);
